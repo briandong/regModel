@@ -14,7 +14,7 @@ This script builds the UVM register model based on pre-defined address map in ma
 rake --tasks
 ```
 > rake clean      # clean
-> rake comp       # compile
-> rake gen        # generate regmodel
-> rake run[case]  # run case
-> rake verdi      # open verdi
+rake comp       # compile
+rake gen        # generate regmodel
+rake run[case]  # run case
+rake verdi      # open verdi
