@@ -1,0 +1,51 @@
+home_dir = Dir.pwd
+apb_dir  = home_dir+"/apb"
+out_dir  = home_dir+"/out"
+
+incdir_list = "+incdir+$UVM_HOME/src $UVM_HOME/src/uvm.sv $UVM_HOME/src/dpi/uvm_dpi.cc "
+incdir_list += "+incdir+#{home_dir} +incdir+#{apb_dir} "
+
+cmd_prefix = "bsub -I"
+cmd_comp = "vcs -sverilog -full64 -timescale=1ns/1ns +acc +vpi -CFLAGS -DVCS #{incdir_list} #{home_dir}/example_tb_top.sv"
+debug_opts = "-debug_access+all -lca"
+cmd_run = "./simv +UVM_VERBOSITY=UVM_HIGH -l vcs.log"
+cmd_verdi = "verdi -sv -uvm #{incdir_list} #{home_dir}/example_tb_top.sv"
+
+task :default => [:run]
+
+desc "generate regmodel"
+task :gen do
+	cmd = "rm example_regmodel.sv; ruby ../regModelGen.rb example_addr_map.md example_regmodel.sv"
+	puts "Running CMD> #{cmd}"
+	system(cmd)
+end
+
+desc "compile"
+task :comp => [:gen] do
+    cmd = "mkdir #{out_dir}; cd #{out_dir}; #{cmd_prefix} #{cmd_comp} #{debug_opts}"
+	puts "Running CMD> #{cmd}"
+	system(cmd)
+end
+
+desc "run case"
+task :run, [:case] => [:comp] do |t, args|
+	args.with_defaults(:case => 'example_base_test')
+    #cmd = "cd #{out_dir}; #{cmd_prefix} #{cmd_run} +UVM_TESTNAME=#{args[:case]} +UVM_CONFIG_DB_TRACE"
+    cmd = "cd #{out_dir}; #{cmd_prefix} #{cmd_run} +UVM_TESTNAME=#{args[:case]}"
+	puts "Running CMD> #{cmd}"
+	system(cmd)
+end
+
+desc "open verdi"
+task :verdi do
+	cmd = "cd #{out_dir}; #{cmd_prefix} #{cmd_verdi} &"
+	puts "Running CMD> #{cmd}"
+	system(cmd)
+end
+
+desc "clean"
+task :clean do
+    cmd = "rm -rf #{out_dir} example_regmodel.sv"
+	puts "Running CMD> #{cmd}"
+	system(cmd)
+end
