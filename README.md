@@ -10,8 +10,10 @@ This script builds the UVM register model based on pre-defined address map in ma
 ```
 $ ruby regModel.rb AddrMap_File Output_File
 ```
+## Sample Address Map
+[Address Map](example/example_addr_map.md)
 
-## Example
+## Example Environment
 
 ```
 $ rake --tasks
