@@ -3,7 +3,7 @@
 # regModel
 
 ## Overview
-This script builds the UVM register model based on pre-defined address map in markdown (mk) style, along with its example environment.
+This script builds the UVM register model based on pre-defined address map in markdown (md) style, along with its example environment.
 
 ## Usage
 
