@@ -44,7 +44,7 @@ Rights: RW
 Offset: 'h10
 
 |Name|Size|Bits|Info|
-|-|-|-|-|-|
+|-|-|-|-|
 |RAM|'h400|32| |
 
 Rights: RW
