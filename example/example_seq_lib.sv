@@ -42,6 +42,15 @@ class example_base_seq extends uvm_sequence; //#(example_item);
 	  `uvm_error(get_full_name(), "REGMODEL BAD READ OP");
 	if (data != data_exp)
 	  `uvm_error(get_full_name(), $sformatf("REGMODEL BAD READ DATA: expected-%0h got-%0h", data_exp, data));
+
+    // Check Cluster
+	for (int i=0; i<8; i++)
+	  regmodel.REG_CLUSTER[i].write(status, i, .parent(this));
+	for (int i=0; i<8; i++) begin
+	  regmodel.REG_CLUSTER[i].read(status, data, .parent(this));
+	  if (data != i)
+	    `uvm_error(get_full_name(), $sformatf("REGMODEL BAD READ DATA: expected-%0h got-%0h", i, data));
+	end
   endtask
 
   virtual task pre_body();
@@ -94,6 +103,15 @@ class example_backdoor_seq extends example_base_seq;
 	  `uvm_error(get_full_name(), "REGMODEL BAD READ OP");
 	if (data != data_exp)
 	  `uvm_error(get_full_name(), $sformatf("REGMODEL BAD READ DATA: expected-%0h got-%0h", data_exp, data));
+
+    // Check Cluster
+	for (int i=0; i<8; i++)
+	  regmodel.REG_CLUSTER[i].write(status, 7-i, UVM_BACKDOOR, .parent(this));
+	for (int i=0; i<8; i++) begin
+	  regmodel.REG_CLUSTER[i].read(status, data, UVM_BACKDOOR, .parent(this));
+	  if (data != 7-i)
+	    `uvm_error(get_full_name(), $sformatf("REGMODEL BAD READ DATA: expected-%0h got-%0h", 7-i, data));
+	end
   endtask
 
 endclass
