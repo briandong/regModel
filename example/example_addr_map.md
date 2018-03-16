@@ -15,8 +15,7 @@ Width(B): 4
 Offset: 'h0
 Size(B): 4
 
-|Name|Size|Position|Access|Volatile?|Reset Value|Reset?|Rand?|Individual 
-|Name|Size|Position|Access|Access?|Info|
+|Name|Size|Position|Access|Volatile?|Reset Value|Reset?|Rand?|Individual Access?|Info|
 |-|-|-|-|-|-|-|-|-|-|
 |PRODUCT_ID|10|16|RO|0|10'h176|1|0|1| |
 |CHIP_ID|8|8|RO|0|8'h5A|1|0|1| |
@@ -29,7 +28,7 @@ Rights: RO
 Offset: 'h4
 Size(B): 4
 
-|Name|Size|Position|Access|Volatile?|Reset Value|Reset?|Rand?|Individual Access|Access?|Info|
+|Name|Size|Position|Access|Volatile?|Reset Value|Reset?|Rand?|Individual Access?|Info|
 |-|-|-|-|-|-|-|-|-|-|
 |VALUE|32|0|RW|1|32'h0|1|0|1| |
 
@@ -40,7 +39,7 @@ Rights: RW
 Offset: 'h10
 Size(B): 4
 
-|Name|Size|Position|Access|Volatile?|Reset Value|Reset?|Rand?|Individual Access|Access?|Info|
+|Name|Size|Position|Access|Volatile?|Reset Value|Reset?|Rand?|Individual Access?|Info|
 |-|-|-|-|-|-|-|-|-|-|
 |HIGH|16|16|RW|1|'h0|1|0|1| |
 |LOW|16|0|RW|1|'h0|1|0|1| |
