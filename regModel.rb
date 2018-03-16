@@ -50,16 +50,19 @@ class Register
     # accessor
     attr_accessor :name
     attr_accessor :offset
+    attr_accessor :size
     attr_accessor :rights
     attr_accessor :f_list
+    attr_accessor :num
 
     # Init
-    def initialize(name, offset, size, rights, f_list)
+    def initialize(name, offset, size, rights, f_list, num = 1)
         @name = 'REG_' + name
 		@offset = offset
 		@size = size
 		@rights = rights
 		@f_list = f_list
+		@num = num
     end
 
 	# Display
@@ -182,7 +185,11 @@ class #{@name} extends uvm_reg_block;
 		@reg_list.each do |r|
 			s += " "*4
 			s += "rand "
-			s += "#{r.name}_t #{r.name};\n"
+			if r.num == 1
+			    s += "#{r.name}_t #{r.name};\n"
+			else
+			    s += "#{r.name}_t #{r.name}[#{r.num}];\n"
+			end
 		end
 
 		@mem_list.each do |m|
@@ -203,12 +210,18 @@ class #{@name} extends uvm_reg_block;
 
 		@reg_list.each do |r|
 			s += " "*8
-			s += "#{r.name} = #{r.name}_t::type_id::create(\"#{r.name}\");\n"
+			if r.num == 1
+			  s += "#{r.name} = #{r.name}_t::type_id::create(\"#{r.name}\");\n"
+			else #cluster
+			  s += "foreach (#{r.name}[i])\n"
+			  s += " "*12
+			  s += "#{r.name}[i] = #{r.name}_t::type_id::create($sformatf(\"#{r.name}[%0d]\", i));\n"
+			end
 		end
 
 		@mem_list.each do |m|
 			s += " "*8
-			s += "#{m.name} = #{m.name}_t::type_id::create(\"#{m.name}\");\n"
+        	s += "#{m.name} = #{m.name}_t::type_id::create(\"#{m.name}\");\n"
 		end
 
 		s += "\n" + " "*8
@@ -216,9 +229,19 @@ class #{@name} extends uvm_reg_block;
 
 		@reg_list.each do |r|
 			s += " "*8
-			s += "#{r.name}.configure(this, null, \"#{r.name}\");\n"
-			s += " "*8
-			s += "#{r.name}.build();\n"
+			if r.num == 1
+			  s += "#{r.name}.configure(this, null, \"#{r.name}\");\n"
+			  s += " "*8
+			  s += "#{r.name}.build();\n"
+			else #cluster
+			  s += "foreach (#{r.name}[i]) begin\n"
+			  s += " "*12
+			  s += "#{r.name}[i].configure(this, null, $sformatf(\"#{r.name}[%0d]\", i));\n"
+			  s += " "*12
+			  s += "#{r.name}[i].build();\n"
+			  s += " "*8
+			  s += "end //foreach\n"
+			end
 		end
 
 		@mem_list.each do |m|
@@ -233,7 +256,13 @@ class #{@name} extends uvm_reg_block;
 
 		@reg_list.each do |r|
 			s += " "*8
-			s += "default_map.add_reg(#{r.name}, #{r.offset}, \"#{r.rights}\");\n"
+			if r.num == 1
+			  s += "default_map.add_reg(#{r.name}, #{r.offset}, \"#{r.rights}\");\n"
+			else #cluster
+			  s += "foreach (#{r.name}[i])\n"
+			  s += " "*12
+			  s += "default_map.add_reg(#{r.name}[i], #{r.offset}+#{r.size}*i, \"#{r.rights}\");\n"
+			end
 		end
 
 		@mem_list.each do |m|
@@ -289,6 +318,7 @@ end #class Block
 		i_bits = nil
 		i_rights = nil
 		i_info = nil
+		i_num = nil
 		i_addr = nil
 		i_width = nil
 
@@ -304,8 +334,13 @@ end #class Block
                 reg_flag = false
 		        mem_flag = true
 				puts "=== start of memory list ==="
-			elsif line =~ /^#+\s*(\w*)/ #start of item
+			elsif line =~ /^#+\s*(\w+)\[(\d*)\]/ #start of cluster item
 				i_name = $1
+				i_num = $2
+				puts "#{i_name}[#{i_num}]:"
+			elsif line =~ /^#+\s*(\w+)/ #start of item
+				i_name = $1
+				i_num = 1
 				puts "#{i_name}:"
 			elsif line =~ /^BaseAddr:\s*(\S*)/
 				i_addr = $1
@@ -316,7 +351,7 @@ end #class Block
 			elsif line =~ /^Offset:\s*(\S*)/
 				i_offset = $1
 				puts "\toffset - #{i_offset}"
-			elsif line =~ /^Size(.*):\s*(\w*)/
+			elsif line =~ /^Size(.*):\s*(\d*)/
 				i_size = $2
 				puts "\tsize - #{i_size}"
 			elsif line =~ /^\|(.*)\|$/ #table
@@ -348,7 +383,7 @@ end #class Block
 
 				# initialize items
 				if reg_flag
-					my_reg = Register.new(i_name, i_offset, i_size, i_rights, field_l)
+					my_reg = Register.new(i_name, i_offset, i_size, i_rights, field_l, i_num)
 					reg_l << my_reg
 					field_l = [] #clear field list
 					puts my_reg.display if debug_flag
