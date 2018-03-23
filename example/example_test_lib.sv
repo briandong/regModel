@@ -45,3 +45,30 @@ class example_backdoor_test extends example_base_test;
   endfunction
 
 endclass
+
+
+// Pre-defined sequence test
+class example_reg_hw_reset_test extends example_base_test;
+
+  `uvm_component_utils(example_reg_hw_reset_test)
+  
+  uvm_reg_hw_reset_seq example_reg_hw_reset_seq;
+
+  // The test’s constructor
+  function new (string name = "example_reg_hw_reset_test", uvm_component parent = null);
+    super.new(name, parent);
+  endfunction
+
+  virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    example_reg_hw_reset_seq = uvm_reg_hw_reset_seq::type_id::create("example_reg_hw_reset_seq");
+    uvm_config_db#(uvm_sequence_base)::set(this, "example_env0.apb.sqr.run_phase",
+      "default_sequence", example_reg_hw_reset_seq);
+  endfunction
+
+  virtual function void connect_phase(uvm_phase phase);
+    super.connect_phase(phase);
+    if (!$cast(example_reg_hw_reset_seq.model, example_env0.regmodel))
+      `uvm_error(get_full_name(), "$cast failed")
+  endfunction
+endclass
