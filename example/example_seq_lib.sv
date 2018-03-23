@@ -1,4 +1,4 @@
-class example_base_seq extends uvm_sequence; //#(example_item);
+class example_base_seq #(type BASE=uvm_sequence #(uvm_reg_item)) extends uvm_reg_sequence #(BASE);
 
   rand int count;
   constraint c1 { count > 0; count < 10; }
